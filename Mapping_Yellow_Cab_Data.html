@@ -1,0 +1,294 @@
+<html>
+<head>
+    <title>Mapping Yellow Cab data</title> </head>
+    <body>
+	<style>
+	p{font:italic small-caps bold 40px Georgia, Garamond, serif}
+	</style>
+	<style>
+	p1{font:italic small-caps bold 25px Georgia, Garamond, serif}
+	</style>
+	<style>
+	p2{font-family: Garamond, serif; font-size:30px;font-style:normal;font-weight:normal}
+	</style>
+<p>Mapping Yellow Cab Data In New York City</p>
+<p1>Yiling You, 06/29/2017</p1>
+<p1><br><br><br><br><br>Introduction<br></p1>
+<p2><br>This report is a summary of mapping the yellow cab pickups and dropoffs in New York city. It would contain the following contents:<br>
+1. Raw data structure<br>
+2. Visualize yellow cab pickup and dropoff locations<br>
+3. Visualize pickup frequency with the heat map<br>
+4. Pickups and dropoffs by month<br>
+5. Pickups by day of week<br>
+6. Pickups by hour<br>
+7. Summary<br>
+<br>
+The mappings are coded and implemented using Matlab R2016a.<br><br></p2>
+
+<p1><br>Raw Data Structure<br></p1>
+<p2><br>The yellow cab data used in this report is available and free to public on the 
+<a href="http://www.nyc.gov/html/tlc/html/about/trip_record_data.shtml">New York city taxi & Limousine Commission website</a>. 
+In addition to the yellow cab data, the green cab and for-hire vehicle trip records are also available on the same webpage for analysis.<br><br>
+Here is a snippet from the CSV file for January yellow cab data. The tabular data is with 11 columns (with the 8 columns of payment information omitted since they are not related to the current work), 
+within which the "tpep_pickup_datetime" (pickup time), "tpep_dropoff_datetime" (dropoff time), "pickup_longitude", "pickup_latitude", "dropoff_longitude" and "dropoff_latitude" are of interest for the purpose of mapping.
+<br><br></p2>
+<html xmlns:o="urn:schemas-microsoft-com:office:office"
+xmlns:x="urn:schemas-microsoft-com:office:excel"
+xmlns="http://www.w3.org/TR/REC-html40">
+
+<head>
+<meta http-equiv=Content-Type content="text/html; charset=gb2312">
+<meta name=ProgId content=Excel.Sheet>
+<meta name=Generator content="Microsoft Excel 15">
+<link rel=File-List href="yellow_tripdata_2016-01_example.files/filelist.xml">
+<style id="yellow_tripdata_2016-01_29382_Styles"><!--table
+	{mso-displayed-decimal-separator:"\.";
+	mso-displayed-thousand-separator:"\,";}
+.xl1529382
+	{padding-top:1px;
+	padding-right:1px;
+	padding-left:1px;
+	mso-ignore:padding;
+	color:black;
+	font-size:11.0pt;
+	font-weight:400;
+	font-style:normal;
+	text-decoration:none;
+	font-family:Garamond, serif;
+	mso-generic-font-family:auto;
+	mso-font-charset:134;
+	mso-number-format:General;
+	text-align:general;
+	vertical-align:middle;
+	mso-background-source:auto;
+	mso-pattern:auto;
+	white-space:nowrap;}
+.xl6329382
+	{padding-top:1px;
+	padding-right:1px;
+	padding-left:1px;
+	mso-ignore:padding;
+	color:black;
+	font-size:11.0pt;
+	font-weight:400;
+	font-style:normal;
+	text-decoration:none;
+	font-family:Garamond, serif;
+	mso-generic-font-family:auto;
+	mso-font-charset:134;
+	mso-number-format:"General Date";
+	text-align:general;
+	vertical-align:middle;
+	mso-background-source:auto;
+	mso-pattern:auto;
+	white-space:nowrap;}
+ruby
+	{ruby-align:left;}
+rt
+	{color:windowtext;
+	font-size:9.0pt;
+	font-weight:400;
+	font-style:normal;
+	text-decoration:none;
+	font-family:Garamond, serif;
+	mso-generic-font-family:auto;
+	mso-font-charset:134;
+	mso-char-type:none;}
+--></style>
+</head>
+
+<div id="yellow_tripdata_2016-01_31962" align=center x:publishsource="Excel">
+
+<table border=0 cellpadding=0 cellspacing=0 width=1532 style='border-collapse:
+ collapse;table-layout:fixed;width:1149pt'>
+ <col width=64 style='width:48pt'>
+ <col width=174 style='mso-width-source:userset;mso-width-alt:6200;width:131pt'>
+ <col width=178 style='mso-width-source:userset;mso-width-alt:6343;width:134pt'>
+ <col width=123 style='mso-width-source:userset;mso-width-alt:4380;width:92pt'>
+ <col width=110 style='mso-width-source:userset;mso-width-alt:3925;width:83pt'>
+ <col width=166 style='mso-width-source:userset;mso-width-alt:5888;width:124pt'>
+ <col width=162 style='mso-width-source:userset;mso-width-alt:5745;width:121pt'>
+ <col width=80 style='mso-width-source:userset;mso-width-alt:2844;width:60pt'>
+ <col width=146 style='mso-width-source:userset;mso-width-alt:5176;width:109pt'>
+ <col width=163 style='mso-width-source:userset;mso-width-alt:5802;width:122pt'>
+ <col width=166 style='mso-width-source:userset;mso-width-alt:5916;width:125pt'>
+ <tr height=19 style='height:14.4pt'>
+  <td height=19 class=xl1531962 width=64 style='height:14.4pt;width:48pt'>VendorID</td>
+  <td class=xl1531962 width=174 style='width:131pt'>tpep_pickup_datetime</td>
+  <td class=xl1531962 width=178 style='width:134pt'>tpep_dropoff_datetime</td>
+  <td class=xl1531962 width=123 style='width:92pt'>passenger_count</td>
+  <td class=xl1531962 width=110 style='width:83pt'>trip_distance</td>
+  <td class=xl1531962 width=166 style='width:124pt'>pickup_longitude</td>
+  <td class=xl1531962 width=162 style='width:121pt'>pickup_latitude</td>
+  <td class=xl1531962 width=80 style='width:60pt'>RatecodeID</td>
+  <td class=xl1531962 width=146 style='width:109pt'>store_and_fwd_flag</td>
+  <td class=xl1531962 width=163 style='width:122pt'>dropoff_longitude</td>
+  <td class=xl1531962 width=166 style='width:125pt'>dropoff_latitude</td>
+ </tr>
+ <tr height=19 style='height:14.4pt'>
+  <td height=19 class=xl1531962 align=right style='height:14.4pt'>2</td>
+  <td class=xl6331962 align=right>2016/1/1 0:00</td>
+  <td class=xl6331962 align=right>2016/1/1 0:00</td>
+  <td class=xl1531962 align=right>2</td>
+  <td class=xl1531962 align=right>1.1</td>
+  <td class=xl1531962 align=right>-73.9903717</td>
+  <td class=xl1531962 align=right>40.73469543</td>
+  <td class=xl1531962 align=right>1</td>
+  <td class=xl6431962>N</td>
+  <td class=xl1531962 align=right>-73.98184204</td>
+  <td class=xl1531962 align=right>40.73240662</td>
+ </tr>
+ <tr height=19 style='height:14.4pt'>
+  <td height=19 class=xl1531962 align=right style='height:14.4pt'>2</td>
+  <td class=xl6331962 align=right>2016/1/1 0:00</td>
+  <td class=xl6331962 align=right>2016/1/1 0:00</td>
+  <td class=xl1531962 align=right>5</td>
+  <td class=xl1531962 align=right>4.9</td>
+  <td class=xl1531962 align=right>-73.98078156</td>
+  <td class=xl1531962 align=right>40.7299118</td>
+  <td class=xl1531962 align=right>1</td>
+  <td class=xl6431962>N</td>
+  <td class=xl1531962 align=right>-73.94447327</td>
+  <td class=xl1531962 align=right>40.71667862</td>
+ </tr>
+ <tr height=19 style='height:14.4pt'>
+  <td height=19 class=xl1531962 align=right style='height:14.4pt'>2</td>
+  <td class=xl6331962 align=right>2016/1/1 0:00</td>
+  <td class=xl6331962 align=right>2016/1/1 0:00</td>
+  <td class=xl1531962 align=right>1</td>
+  <td class=xl1531962 align=right>10.54</td>
+  <td class=xl1531962 align=right>-73.98455048</td>
+  <td class=xl1531962 align=right>40.67956543</td>
+  <td class=xl1531962 align=right>1</td>
+  <td class=xl6431962>N</td>
+  <td class=xl1531962 align=right>-73.95027161</td>
+  <td class=xl1531962 align=right>40.78892517</td>
+ </tr>
+ <tr height=19 style='height:14.4pt'>
+  <td height=19 class=xl1531962 align=right style='height:14.4pt'>2</td>
+  <td class=xl6331962 align=right>2016/1/1 0:00</td>
+  <td class=xl6331962 align=right>2016/1/1 0:00</td>
+  <td class=xl1531962 align=right>1</td>
+  <td class=xl1531962 align=right>4.75</td>
+  <td class=xl1531962 align=right>-73.99346924</td>
+  <td class=xl1531962 align=right>40.71899033</td>
+  <td class=xl1531962 align=right>1</td>
+  <td class=xl6431962>N</td>
+  <td class=xl1531962 align=right>-73.96224213</td>
+  <td class=xl1531962 align=right>40.65733337</td>
+ </tr>
+ <tr height=19 style='height:14.4pt'>
+  <td height=19 class=xl1531962 align=right style='height:14.4pt'>2</td>
+  <td class=xl6331962 align=right>2016/1/1 0:00</td>
+  <td class=xl6331962 align=right>2016/1/1 0:00</td>
+  <td class=xl1531962 align=right>3</td>
+  <td class=xl1531962 align=right>1.76</td>
+  <td class=xl1531962 align=right>-73.96062469</td>
+  <td class=xl1531962 align=right>40.78133011</td>
+  <td class=xl1531962 align=right>1</td>
+  <td class=xl6431962>N</td>
+  <td class=xl1531962 align=right>-73.9772644</td>
+  <td class=xl1531962 align=right>40.7585144</td>
+ </tr>
+ <tr height=19 style='height:14.4pt'>
+  <td height=19 class=xl1531962 align=right style='height:14.4pt'>2</td>
+  <td class=xl6331962 align=right>2016/1/1 0:00</td>
+  <td class=xl6331962 align=right>2016/1/1 0:18</td>
+  <td class=xl1531962 align=right>2</td>
+  <td class=xl1531962 align=right>5.52</td>
+  <td class=xl1531962 align=right>-73.9801178</td>
+  <td class=xl1531962 align=right>40.74304962</td>
+  <td class=xl1531962 align=right>1</td>
+  <td class=xl6431962>N</td>
+  <td class=xl1531962 align=right>-73.9134903</td>
+  <td class=xl1531962 align=right>40.76314163</td>
+ </tr>
+ <tr height=19 style='height:14.4pt'>
+  <td height=19 class=xl1531962 align=right style='height:14.4pt'>2</td>
+  <td class=xl6331962 align=right>2016/1/1 0:00</td>
+  <td class=xl6331962 align=right>2016/1/1 0:26</td>
+  <td class=xl1531962 align=right>2</td>
+  <td class=xl1531962 align=right>7.45</td>
+  <td class=xl1531962 align=right>-73.9940567</td>
+  <td class=xl1531962 align=right>40.71998978</td>
+  <td class=xl1531962 align=right>1</td>
+  <td class=xl6431962>N</td>
+  <td class=xl1531962 align=right>-73.966362</td>
+  <td class=xl1531962 align=right>40.78987122</td>
+ </tr>
+ <![if supportMisalignedColumns]>
+ <tr height=0 style='display:none'>
+  <td width=64 style='width:48pt'></td>
+  <td width=174 style='width:131pt'></td>
+  <td width=178 style='width:134pt'></td>
+  <td width=123 style='width:92pt'></td>
+  <td width=110 style='width:83pt'></td>
+  <td width=166 style='width:124pt'></td>
+  <td width=162 style='width:121pt'></td>
+  <td width=80 style='width:60pt'></td>
+  <td width=146 style='width:109pt'></td>
+  <td width=163 style='width:122pt'></td>
+  <td width=166 style='width:125pt'></td>
+ </tr>
+ <![endif]>
+</table>
+
+</div>
+<p2><br></p2>
+<p1><br>Visualize Yellow Cab Pickup and Dropoff Locations<br></p1>
+
+<p2><br>To see the New York city yellow cab usage pattern in, for example, January 2016, we can show the yellow cab pickup and dropoff data over the map. <br><br></p2>
+
+
+<img src="E:/Uber Map/pick_up_Jan_all2.png" width=1000 />
+
+<img src="E:/Uber Map/drop_off_Jan_all2.png" width=1000 />
+
+<p2><br>We can see that Manhattan is both the most popular departure and destination for yellow cab users in January 2016. 
+Also the dropoff locations are more widespread compared to the pickup locations among New York city.<br><br></p2>
+
+<p1><br>Visualize Pickup Frequency with the Heat Map<br></p1>
+<p2><br>In the plots above Manhattan is almost completely blanketed by dense dots and it's hard to see any details. 
+We can do a better job by visualizing the frequency with the heat map.
+We show the plots for Febrary and March, 2016 as below.<br><br></p2>
+
+<img src="E:/Uber Map/pickup_Feb_heat2.png" width=1000 />
+<img src="E:/Uber Map/pickup_Mar_heat2.png" width=1000 />
+
+<p2><br>The plots show that the yellow cab is particularly popular along Fifth Avenue, around Grand Central Station, Penn Station, Chelsea, around the Empire State Building, and Soho. <br> <br></p2>
+
+<p1><br>Pickups and Dropoffs by Month<br></p1>
+
+<p2><br>We are also interested in how the yellow cab usage pattern changed over time in 2016.
+
+First we want to see whether there is month over month difference in the pattern.
+We use animation to detect any variation by location.<br><br></p2>
+
+<img src="E:/Uber Map/monthly.gif"/width=1000>
+<img src="E:/Uber Map/monthly_dropoff.gif"/width=1000>
+
+<p2><br>Note that the cooler map in January is due to the significantly smaller record size compared to the other months. 
+Also it's worth mentioning that the "pickup_longitude", "pickup_latitude", "dropoff_longitude" and "dropoff_latitude" information is only available before July 2016 for the TLC Trip Record Data.<br><br></p2>
+<p2>With the animation we can easily see that the yellow cab usage pattern is basically consistent month by month. <br><br></p2>
+
+<p1><br>Pickups by Day of Week<br></p1>
+<p2><br>How about the changes by day of week? Again we animate this over the map.<br><br></p2>
+
+<img src="E:/Uber Map/daily_Feb-May.gif"/width=1000>
+<p2><br>It seems there are more yellow cab rides in the weekdays than during the weekends.
+Probably New York yellow cab are more for business travelers due to the fact that 
+<a href="http://www.nbcbayarea.com/blogs/frameshift/Uber-Is-Cheaper-Than-A-Taxi-Except-When-Its-Not-280818972.html">prices for Uber and Lyft are higher on weekday mornings and evenings </a>.<br><br></p2>
+
+<p1><br>Pickups by Hour<br></p1>
+<p2><br>Finally, to see the volume changes during the hours for the yellow cab pickups, let's animate this as well.<br><br></p2>
+<img src="E:/Uber Map/hourly_Feb-May.gif"/width=1000>
+<p2><br>We can see that Midtown gets busy during the morning rush hour, afternoon and the volumn peaks during the evening rush hour. 
+Also notice that Soho and Chelsea get more active during the evening.<br><br></p2>
+
+<p1><br>Summary<br></p1>
+<p2><br>It is surprising to see that the New York city yellow cab does share much the same usage pattern as that of Uber in terms of the pickups by day of week and by hour.
+This might bring up again the question: is the ride-sharing platform taking rides away from taxis, or they are supplementing each other?<br><br>
+Also it would be interesting to see how the pattern changes year over year, which is doable because the yellow cab trip record data is available from 2009 through 2016 (unfortunately it's not feasible to do the analysis on my laptop due to the memory limitation).<br><br></p2>
+
+    </body>
+</html>
